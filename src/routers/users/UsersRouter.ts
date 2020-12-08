@@ -195,9 +195,11 @@ class UsersRouter {
          
         if (meta_data.hasOwnProperty('password')) {
           const password_request : string = meta_data.password;
-          const password_request_encoded : string  = SHA1(password_request);
+          if ( !UtilitiesHelper.isEmpty(password_request) ){
+            const password_request_encoded : string  = SHA1(password_request);
 
-          data_main = { ...data_main, ...{ password : password_request_encoded } };
+            data_main = { ...data_main, ...{ password : password_request_encoded } };
+          }
         }
         
         data_meta = {
@@ -214,7 +216,9 @@ class UsersRouter {
               for (const [key, value] of Object.entries(data_main)) {
                 
                 if (key==='date_created'){ continue; }
-                if ( !meta_data.hasOwnProperty('password')) { continue; }
+                if ( key==='password' ){
+                    if ( value==='' ) { continue; }
+                }
 
                 data_meta.push( key+'="'+value+'"' );
               }
@@ -244,6 +248,7 @@ class UsersRouter {
                 query += ` UPDATE ${TBLprefix}users_meta SET meta_value = '${value}' WHERE meta_key LIKE '${key}' AND  group_id IN (${id}); `;
               } 
 
+          
               try{
                 DBconnect.query( query, function( err : Array<any>,  rows : Array<any>, fields : Array<any> ) {
                   if (err){
@@ -338,17 +343,19 @@ class UsersRouter {
         
       try{
 
-        const params_request : any = req.query;
+          const params_request : any = req.query;
+          const params_body : any = req.body;
+
           let sql_limit_arr : Array<number> = [];
           let status : number = 0, query : string = '' ;
           let limit : number = 15, current_page : number = 1;
 
-          if ( params_request.hasOwnProperty('limit')) {
-            limit = parseInt(params_request['limit']);
+          if ( params_body.hasOwnProperty('limit')) {
+            limit = parseInt(params_body['limit']);
           }
 
-        if (params_request.hasOwnProperty('page')) {
-            let page : any = ( parseInt(params_request['page'])===1) ? 0 :  parseInt(params_request['page']);
+        if (params_body.hasOwnProperty('page')) {
+            let page : any = ( parseInt(params_body['page'])===1) ? 0 :  parseInt(params_body['page']);
 
             current_page = page + 1;
 
@@ -356,25 +363,45 @@ class UsersRouter {
             sql_limit_arr.push( parseInt(page) );
           }
       
-          if (params_request.hasOwnProperty('limit')) {
+          if (params_body.hasOwnProperty('limit')) {
             sql_limit_arr.push(limit);
           } 
+
+          let where_conditions : string = '';
+          let where_conditions_arr : any = [];
+          let query_order : string = `ORDER BY first_name ASC, last_name ASC  `;
+
+
+          if ( params_body.hasOwnProperty('status')) {
+            let status : number = parseInt(params_body['status']);
+            if ( status>=0 ){ where_conditions_arr.push(` status IN (${status}) `); }
+          }
+  
+          if ( params_body.hasOwnProperty('name')) {
+            let name : string  = params_body['name'];
+            if ( name!=='' ){ where_conditions_arr.push(` ( first_name LIKE "${name}%" OR  last_name LIKE "${name}%" ) `); }
+          }
+  
+          if ( where_conditions_arr.length>0 ){
+            where_conditions = ` WHERE ${where_conditions_arr.join(' AND ')} `;
+          }
 
 
           this._async.parallel({
 
             list: function(callback : any) {
 
-                  let query : string = ` SELECT * FROM  ${TBLprefix}users ORDER BY first_name ASC, last_name ASC  `;
-        
-                  if (params_request.hasOwnProperty('id')) {
-                    query = ` SELECT * FROM  ${TBLprefix}users WHERE id IN ( ${params_request['id']} )`;
+                  let query : string = ` SELECT * FROM  ${TBLprefix}users  ${where_conditions} ${query_order}   `;
+   
+                  if (params_body.hasOwnProperty('id')) {
+                    query = ` SELECT * FROM  ${TBLprefix}users WHERE id IN ( ${params_body['id']} )`;
                   }
           
                   if ( sql_limit_arr.length>1 ){
                     query += " LIMIT " + sql_limit_arr.join(',');
                   }
-      
+  
+
                   try{
       
                     DBconnect.query( query, function( err : Array<any>,  rows : Array<any>, fields : Array<any> ) {
@@ -393,7 +420,7 @@ class UsersRouter {
 
             total: function(callback : any) {
                   try{
-                    const query : string = ` SELECT COUNT(*) as total FROM ${TBLprefix}users  `;
+                    const query : string = ` SELECT COUNT(*) as total FROM ${TBLprefix}users   ${where_conditions} ${query_order} `;
                     DBconnect.query( query, function( err : Array<any>,  rows : Array<any>, fields : Array<any> ) {
                         if (err){
                           callback(null, { status : 0 } );
@@ -431,7 +458,8 @@ class UsersRouter {
           
                 let all_users_id_imploded : string = all_users_id_arr.join();
         
-                let query = ` SELECT * FROM  ${TBLprefix}users_meta WHERE group_id IN (${all_users_id_imploded}) `;
+                let query = ` SELECT * FROM  ${TBLprefix}users_meta WHERE group_id IN (${all_users_id_imploded})  ORDER BY FIELD( group_id, ${all_users_id_imploded} ) `;
+
                 DBconnect.query( query, function( err : Array<any>,  rows : Array<any>, fields : Array<any> ) {
                     if (err){
                       res.status(500).send(error_response);

@@ -297,16 +297,18 @@ class BrandsRouter {
       try{
         
           const params_request : any = req.query;
+          const params_body : any = req.body;
+
           let sql_limit_arr : Array<number> = [];
           let status : number = 0, query : string = '' ;
           let limit : number = 15, current_page : number = 1;
 
-          if ( params_request.hasOwnProperty('limit')) {
-            limit = parseInt(params_request['limit']);
+          if ( params_body.hasOwnProperty('limit')) {
+            limit = parseInt(params_body['limit']);
           }
 
-        if (params_request.hasOwnProperty('page')) {
-            let page : any = ( parseInt(params_request['page'])===1) ? 0 :  parseInt(params_request['page']);
+        if (params_body.hasOwnProperty('page')) {
+            let page : any = ( parseInt(params_body['page'])===1) ? 0 :  parseInt(params_body['page']);
 
             current_page = page + 1;
 
@@ -314,19 +316,38 @@ class BrandsRouter {
             sql_limit_arr.push( parseInt(page) );
           }
       
-          if (params_request.hasOwnProperty('limit')) {
+          if (params_body.hasOwnProperty('limit')) {
             sql_limit_arr.push(limit);
           } 
 
+
+          let where_conditions : string = '';
+          let where_conditions_arr : any = [];
+          let query_order : string = ` ORDER BY name ASC `;
+
+
+          if ( params_body.hasOwnProperty('status')) {
+            let status : number = parseInt(params_body['status']);
+            if ( status>=0 ){ where_conditions_arr.push(` status IN (${status}) `); }
+          }
+  
+          if ( params_body.hasOwnProperty('name')) {
+            let name : string  = params_body['name'];
+            if ( name!=='' ){ where_conditions_arr.push(` name LIKE "${name}%" `); }
+          }
+  
+          if ( where_conditions_arr.length>0 ){
+            where_conditions = ` WHERE ${where_conditions_arr.join(' AND ')} `;
+          }
 
           this._async.parallel({
 
             list: function(callback : any) {
 
-                  let query : string = ` SELECT * FROM  ${TBLprefix}brands ORDER BY name ASC `;
+                  let query : string = ` SELECT * FROM  ${TBLprefix}brands ${where_conditions} ${query_order} `;
         
-                  if (params_request.hasOwnProperty('id')) {
-                    query = ` SELECT * FROM  ${TBLprefix}brands WHERE id IN ( ${params_request['id']} )`;
+                  if (params_body.hasOwnProperty('id')) {
+                    query = ` SELECT * FROM  ${TBLprefix}brands WHERE id IN ( ${params_body['id']} )`;
                   }
           
                   if ( sql_limit_arr.length>1 ){
@@ -351,7 +372,7 @@ class BrandsRouter {
 
             total: function(callback : any) {
                   try{
-                    const query : string = ` SELECT COUNT(*) as total FROM ${TBLprefix}brands `;
+                    const query : string = ` SELECT COUNT(*) as total FROM ${TBLprefix}brands ${where_conditions} ${query_order} `;
                     DBconnect.query( query, function( err : Array<any>,  rows : Array<any>, fields : Array<any> ) {
                         if (err){
                           callback(null, { status : 0 } );
@@ -388,7 +409,7 @@ class BrandsRouter {
           
                 let all_products_id_imploded : string = all_brands_id_arr.join();
         
-                let query = ` SELECT * FROM  ${TBLprefix}brands_meta WHERE group_id IN (${all_products_id_imploded}) `;
+                let query = ` SELECT * FROM  ${TBLprefix}brands_meta WHERE group_id IN (${all_products_id_imploded})  ORDER BY FIELD( group_id, ${all_products_id_imploded} ) `;
                 DBconnect.query( query, function( err : Array<any>,  rows : Array<any>, fields : Array<any> ) {
                     if (err){
                       res.status(500).send(error_response);

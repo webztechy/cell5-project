@@ -7,6 +7,7 @@ const Home = () => {
     const [ pTotal, setPTotal ] = useState<number>(0);
     const [ bTotal, setBTotal ] = useState<number>(0);
     const [ uTotal, setUTotal ] = useState<number>(0);
+    const [ loginDetail, setLoginDetail ] = useState<any>({});
 
     const getTotal = async ( type : string ) => {
     
@@ -30,7 +31,16 @@ const Home = () => {
         }); 
 
     }
+
+    
     useEffect( () =>{
+
+        const login_session : any = sessionStorage.getItem('login_session');
+        const sessionUserLogin : any = JSON.parse(login_session);
+
+        if ( sessionUserLogin !== null ){
+            setLoginDetail( sessionUserLogin );
+        }
         
         getTotal('products');
         getTotal('brands');
@@ -41,7 +51,7 @@ const Home = () => {
     return (
         <div className="fade-in">
             
-            <h2>Welcome, Renier!</h2>
+            <h2>Welcome, {loginDetail.first_name} !</h2>
             <ul className="summary-list mt-3">
                 <li className="summary-list--box">
                     <div className="summary-list--icon"><i className="fa fa-product-hunt" aria-hidden="true"></i></div>

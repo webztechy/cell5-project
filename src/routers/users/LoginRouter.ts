@@ -59,7 +59,7 @@ class LoginRouter {
               if (err){
                 res.status(400).send(error_response);
               }else{
-                res.send(JSON.stringify({status : 1 , rows : rows}));
+                res.send(JSON.stringify({status : 1 , rows : rows[0]}));
               }
           }); 
         }catch( err  : any ){

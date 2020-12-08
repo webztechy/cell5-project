@@ -4,3 +4,10 @@ export const showNotification = (nr : string = '' ) : Object =>{
       payload : nr
     }
 }
+
+export const isLoggedin = (nr : number = 0 ) : Object  =>{
+  return{
+    type : 'LOGGEDIN_STATUS',
+    payload : nr
+  }
+}

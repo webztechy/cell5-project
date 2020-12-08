@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-
 import axios from 'axios';
 import moment from 'moment';
 import { confirmAlert } from 'react-confirm-alert'; 
@@ -8,7 +7,6 @@ import { confirmAlert } from 'react-confirm-alert';
 import Utilities from './../helpers/Utilities';
 import config from './../helpers/Config';
 
-import ProductsBulk from './ProductsBulk';
 import { showNotification  } from '../actions';
 import { useDispatch } from 'react-redux';
 
@@ -24,21 +22,18 @@ export interface pagesInfoFields {
 export interface filterValuesFields {
     page : number;
     limit : number;
-    brand_id : number,
-    featured : number;
     status : number;
     name : string;
 }
 
+
 export interface tableHeadSort {
     name : number;
-    featured_status : number,
-    price : number;
     status : number;
     date_created : number;
 }
 
-const Products = () => {
+const Brands = () => {
 
     const pagesInfoTemp  : pagesInfoFields = {
         current_page : 0,
@@ -51,22 +46,17 @@ const Products = () => {
     const filterValuesOption : filterValuesFields = {
         page : 1,
         limit : config.page_limit,
-        brand_id : 0,
-        featured: -1,
         status :-1,
         name : ''
     }
 
     const tableHeadLabelsSort : tableHeadSort = {
         name : 1,
-        featured_status : 0,
-        price : 0,
         status : 0,
         date_created :0,
     }
 
     const dispatch = useDispatch();
-    const [ listBrands, setListBrands ] = useState<any>({});
     const [ list, setList ] = useState<any>([]);
     const [ pagesInfo, setPagesInfo ] = useState<pagesInfoFields>(pagesInfoTemp);
     const [ pagesFilter, setPagesFilter ] = useState<filterValuesFields>(filterValuesOption);
@@ -74,36 +64,21 @@ const Products = () => {
     const [ pageLimit, setPageLimit ] = useState<any>( Utilities.pageLimit() );
     const [ bulkActionSelected, setBulkActionSelected ] = useState<number>(0);
     const [ choosenID, setChoosenID ] = useState<any>([]);
-    const [ popupClass, setPopupClass ] = useState<string>('');
-
-    const [ popupCurrencyClass, setPopupCurrencyClass ] = useState<string>('');
-    const [ currencyRates, setCurrencyRates ] = useState<any>({});
-    const [ choosenCurrency, setChoosenCurrency ] = useState<string>('');
-    const [ choosenRate, setChoosenRate ] = useState<number>(0);
 
     const pushValue = (e : any, fieldName : string ) =>{
         fieldName = fieldName.toLowerCase();
         let value : any = e.target.value;
 
-        if ( fieldName==='brand'){
-            setPagesFilter({...pagesFilter, ...{ brand_id : value } });
+        if ( fieldName==='name'){
+            setPagesFilter({...pagesFilter, ...{ name : value } });
         }else  if ( fieldName==='status'){
             setPagesFilter({...pagesFilter, ...{ status : value } });
-        }else  if ( fieldName==='featured'){
-            setPagesFilter({...pagesFilter, ...{ featured : value } });
-        }else  if ( fieldName==='name'){
-            setPagesFilter({...pagesFilter, ...{ name : value } });
         }else  if ( fieldName==='page'){
             setPagesFilter({...pagesFilter, ...{ page : value } });
         }else  if ( fieldName==='limit'){
             setPagesFilter({...pagesFilter, ...{ limit : value } });
         } 
 
-    }
-
-    const closeBulkPopUp = () => {
-        setPopupClass('');
-        setBulkActionSelected(0);
     }
 
     const messagePopup = ( title : string = 'Error', message : string = '' ) => {
@@ -147,10 +122,6 @@ const Products = () => {
 
                 if ( fieldName=='name'){
                     tableHeadSortTemp = { ...tableHeadSortTemp, ...{ name : currentSort } };
-                }else if ( fieldName=='price'){
-                    tableHeadSortTemp = { ...tableHeadSortTemp, ...{ price : currentSort } };
-                }else if ( fieldName=='featured_status'){
-                    tableHeadSortTemp = { ...tableHeadSortTemp, ...{ featured_status : currentSort } };
                 }else if ( fieldName=='status'){
                     tableHeadSortTemp = { ...tableHeadSortTemp, ...{ status : currentSort } };
                 }else if ( fieldName=='date_created'){
@@ -176,9 +147,8 @@ const Products = () => {
     
     const resetFilter = () => {
         setPagesFilter(filterValuesOption);
-        setChoosenCurrency('');
-        setChoosenRate(0);
     }
+
 
     const bulkAction = (e : any) => {
         let value : number = e.target.value;
@@ -194,10 +164,7 @@ const Products = () => {
                     ]
                 }); 
                 
-            }else if ( value==2 ){
-                setPopupClass('show');
             }
-
             setBulkActionSelected(value);
             return false;
         }
@@ -211,12 +178,11 @@ const Products = () => {
         if ( !Utilities.isEmpty(ids) ){
             
             axios
-            .post(config.api_url+'/api/products/delete', { ids : ids } )
+            .post(config.api_url+'/api/brands/delete', { ids : ids } )
             .then( (response : any )=> {
                 let result_response : any = response.data;
   
                 if ( parseInt(result_response.status)===1 ){
-                    //messagePopup('Success', 'Delete successfully!');
                     fecthList();
                     dispatch( showNotification('Delete successfully!') );
                 }else{
@@ -232,19 +198,10 @@ const Products = () => {
         setBulkActionSelected(0);
     }
 
-
-    const getBrandName = ( id : number ) : string => {
-        let brand_name : string = '-';
-        if (listBrands.hasOwnProperty(id)) {
-            brand_name = listBrands[id].name;
-        }
-        return brand_name;
-    }
-
     const fecthList = async () => {
-        
+
         axios
-        .post(config.api_url+'/api/products/list', pagesFilter )
+        .post(config.api_url+'/api/brands/list', pagesFilter )
         .then( ( response : any ) => {
             let result_response : any = [], record_list : any = [];
 
@@ -257,17 +214,10 @@ const Products = () => {
                 const localTime : any = moment.utc(row.date_created);  
                 const local_time = moment(new Date(localTime)).format('DDMMMYY hh:mm:ss').toLocaleString();   
     
-                let price_rate : any = '';
-                if ( choosenRate>0 ){
-                    price_rate = row.price * choosenRate;
-                    price_rate = Utilities.number_format(price_rate, 2);
-                }
-                const date_formatted : any = { date_formatted : local_time, price_rate : price_rate };
+                const date_formatted : any = { date_formatted : local_time };
                 record_list[key] = { ...row, ...date_formatted };
 
             }
-
-            //record_list = Utilities.toNormalArrayObject(record_list);
 
             const pagesInfoTemp : pagesInfoFields = {
                 current_page : result_response.current_page,
@@ -287,169 +237,58 @@ const Products = () => {
         }); 
     }
 
-
-    const fecthListBrands = async () => {
-        axios
-        .post(config.api_url+'/api/brands/list')
-        .then( response => {
-            let result_response : any = [], record_list : any = [];
-
-            result_response = response.data;
-            record_list = result_response.list;
-
-            let all_brands_rows : any = [];
-
-            for (const [key, value ]  of Object.entries(record_list) ) {
-                let row : any = value;
-                all_brands_rows[row.id] = value;
-            }
-            
-            //record_list = Utilities.toNormalArrayObject(record_list);
-            setListBrands( all_brands_rows );  
-
-        })
-        .catch((err : any ) => {
-            setListBrands({});
-        });
-    }
-
-
-    const updateListBulk = ( values : Array<any> ) =>{
-   
-        if ( Object.keys(values).length>0 ){
-
-            let valuesRequest : Array<any> = {...values, ...{ id : choosenID.join(',') } };
-
-            axios
-            .post(config.api_url+'/api/products/update?bulk=1', valuesRequest )
-            .then( (response : any )=> {
-                let result_response : any = response.data;
-
-                if ( parseInt(result_response.status)===1 ){
-                    //messagePopup('Success', 'Updated successfully!');
-                    fecthList();
-                    closeBulkPopUp();
-
-                    dispatch( showNotification('Updated successfully!') );
-                }else{
-                    messagePopup('Error', 'Could not update record!');
-                }
-            })
-            .catch( (err : any ) => {
-                messagePopup('Error', 'Could not update record!');
-            }); 
-
-        }
-    }
-    
-    const getCurrenctConversion = async () => {
-        axios
-        .get('https://api.exchangeratesapi.io/latest?base=USD')
-        .then( (response : any )=> {
-            const ratesCurrency : any = response.data.rates;
-            //console.log(ratesCurrency);
-            setCurrencyRates(ratesCurrency);
-        })
-        .catch( (err : any ) => {
-            
-        }); 
-    } 
-
-    const showRatePopup = ( action : number ) => {
-        let actionClass : string = ( action===1) ? 'show' : '';
-        setPopupCurrencyClass(actionClass);
-    }
-
-    const showOtherRate = (e : any, curr_name : string ) => {
-        let rate : any = e.target.value;
-        let currName : string = curr_name.toLowerCase();
-
-        if ( currName!=='usd' ){
-            setChoosenCurrency(` / ${curr_name}`);
-            setChoosenRate(rate);
-        }else{
-            setChoosenCurrency('');
-            setChoosenRate(0);
-        }
-        showRatePopup(0);
-    }
-
-   
-    useEffect( () => {
-        fecthListBrands();
-        getCurrenctConversion();
-
-    }, []);
-
     useEffect( () => {
         fecthList();
-    },[pagesFilter, choosenRate]);
+    },[pagesFilter]);
 
     return (
         <div className="fade-in">
 
             <ul className="ul-table--filter">
-                <li>Product List</li>
+                <li>Brand List</li>
                 <li className="ul-table--filter--option">
                     filter by
-                    <select className="cell-input" value={pagesFilter.brand_id} onChange={ (e) => pushValue( e, 'brand') }>
-                        <option value="-1">brand name</option>
-                        { Object.entries(listBrands).map( ( [key, row ] : any ) => (
-                             <option key={row.group_id} value={row.group_id}>{row.name}</option>
-                         ))}
-                    </select>
-                   
-                    <select className="cell-input" value={pagesFilter.featured} onChange={ (e) => pushValue( e, 'featured') }>
-                        <option value="-1">featured</option>
-                        <option value="1">yes</option>
-                        <option value="0">no</option>
-                    </select>
-
                     <select className="cell-input" value={pagesFilter.status} onChange={ (e) => pushValue( e, 'status') }>
                         <option value="-1">status</option>
                         <option value="1">active</option>
                         <option value="0">inactive</option>
                     </select>
-
                     <input type="text" className="cell-input" placeholder="type name here.." value={pagesFilter.name} onChange={ (e) => pushValue( e, 'name') }></input>
-                    
+
                     <button type="button" className="btn-cell--primary" onClick={ (e) => resetFilter() }>reset</button>
                 </li>
             </ul>
 
-            <ul className="ul-table ul-table--head ul-table--products">
+            <ul className="ul-table ul-table--head ul-table--brands">
                 <li className="ul-table--tr">
                     <div></div>
-                    <div className={ ( (tableHeadSort.name===1) ? 'sort-asc' : (tableHeadSort.name===2) ? 'sort-desc' : '' )} onClick={ () => updateSort('name') } >Name</div>
-                    <div className="sort-none">Brand</div>
-                    <div className={ ( (tableHeadSort.price===1) ? 'sort-asc' : (tableHeadSort.price===2) ? 'sort-desc' : '' )} onClick={ () => updateSort('price') } >Price (usd{choosenCurrency})</div>
-                    <div className={ ( (tableHeadSort.featured_status===1) ? 'sort-asc' : (tableHeadSort.featured_status===2) ? 'sort-desc' : '' )} onClick={ () => updateSort('featured_status') } >Featured</div>
-                    <div className={ ( (tableHeadSort.status===1) ? 'sort-asc' : (tableHeadSort.status===2) ? 'sort-desc' : '' )} onClick={ () => updateSort('status') } >Status</div>
-                    <div className={ ( (tableHeadSort.date_created===1) ? 'sort-asc' : (tableHeadSort.date_created===2) ? 'sort-desc' : '' )} onClick={ () => updateSort('date_created') }  >Date Created</div>
-                    <div className="sort-none"></div>
+                    <div className={ ( (tableHeadSort.name===1) ? 'sort-asc' : (tableHeadSort.name===2) ? 'sort-desc' : '' )} onClick={ () => updateSort('name') } >name</div>
+                    <div className="sort-none">description</div>
+                    <div className={ ( (tableHeadSort.status===1) ? 'sort-asc' : (tableHeadSort.status===2) ? 'sort-desc' : '' )} onClick={ () => updateSort('status') } >status</div>
+                    <div className={ ( (tableHeadSort.date_created===1) ? 'sort-asc' : (tableHeadSort.date_created===2) ? 'sort-desc' : '' )} onClick={ () => updateSort('date_created') } >date created</div>
+                    <div  className="sort-none"></div>
                 </li>
             </ul>
 
 
-            <ul className="ul-table ul-table--body ul-table--products">
-                { 
-                    ( pagesInfo.status===1 && pagesInfo.total_pages>0 ) ?
-                        (
-                            Object.entries(list).map( ( [key, row ] : any ) => (
-                            <li  key={row.group_id} className="ul-table--tr">
-                                <div><input type="checkbox" className="cell-checkbox" value={row.group_id} onChange={ (e) => _pushID(e) }></input></div>
-                                <div>{row.name}</div>
-                                <div>{getBrandName(row.brand_id)}</div>
-                                <div>{Utilities.number_format(row.price, 2)} <span className="price-rate">{row.price_rate}</span></div>
-                                <div>{Utilities.featuredLabels(row.featured_status)}</div>
-                                <div>{Utilities.statusLabels(row.status)}</div>
-                                <div>{row.date_formatted}</div>
-                                <div><Link to={`/products-form/${btoa(row.group_id)}`} className="btn-record--edit"></Link></div>
-                            </li>
-                            ))
-                    ) : 
-                    ( <li className="no-record">no record available</li> )
-                }
+            <ul className="ul-table ul-table--body ul-table--brands">
+            { 
+                ( pagesInfo.status===1 && pagesInfo.total_pages>0 ) ?
+                    (
+                        Object.entries(list).map( ( [key, row ] : any ) => (
+                        <li  key={row.group_id} className="ul-table--tr">
+                            <div><input type="checkbox" className="cell-checkbox" value={row.group_id} onChange={ (e) => _pushID(e) }></input></div>
+                            <div>{row.name}</div>
+                            <div>{row.description}</div>
+                            <div>{Utilities.statusLabels(row.status)}</div>
+                            <div>{row.date_formatted}</div>
+                            <div><Link to={`/brands-form/${btoa(row.group_id)}`} className="btn-record--edit"></Link></div>
+                        </li>
+                        ))
+                ) : 
+                ( <li className="no-record">no record available</li> )
+            }
+        
             </ul>
 
             <ul className="ul-table ul-table--footer">
@@ -463,7 +302,6 @@ const Products = () => {
                                 <select className="cell-input" value={bulkActionSelected} onChange={ (e) => bulkAction(e) }>
                                     <option value="0">---</option>
                                     <option value="1">delete</option>
-                                    <option value="2">edit</option>
                                 </select>
                             </div>
 
@@ -494,50 +332,8 @@ const Products = () => {
                 }
             </ul>
 
-
-            <div className="mt-2 columns clm-6">
-                <div className="btn-cell--primary btn-currency--changer full-width" onClick={ ()=> showRatePopup(1) }>see other rates</div>
-            </div>
-            
-            <ProductsBulk
-                    popupClass={popupClass}
-                    closeBulkPopUp={closeBulkPopUp}
-                    listBrands={listBrands}
-                    listCounterChoosen={choosenID.length}
-                    updateListBulk={updateListBulk}
-            ></ProductsBulk>
-
-            <div className="modal-cell-wrap">
-
-                <div className={ `modal-cell show- ${popupCurrencyClass}` }>
-                    <div className="modal-cell--content">
-                        <div className="modal-cell--content__head">
-                            Check Price by Currency Rate
-                            <div className="btn-modal-close" onClick={ () =>  showRatePopup(0) }>x</div>
-                        </div>
-                        <div className="modal-cell--content__body">
-
-                                <ul className="curency-list">
-                                { Object.entries(currencyRates).map( ( [key, rate ] : any ) => (
-                                    <li key={{key}} className="currency-list-row">
-                                        <div>{key}</div>
-                                        <div>{rate}</div>
-                                        <div><input type="radio" value={rate}  name="rates" onClick={ (e) => showOtherRate(e, key ) }/></div>
-                                    </li>
-                                    ))
-                                }
-                                </ul>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-                        
-
-                        
-            
         </div>
     )
 }
 
-export default Products;
+export default Brands;

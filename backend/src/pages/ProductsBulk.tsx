@@ -63,7 +63,7 @@ const ProductsBulk : React.FC<Props>  = ( props ) => {
     return (
         <div className="modal-cell-wrap">
 
-                <div className={ 'modal-cell show- ' + props.popupClass }>
+                <div className={ `modal-cell show- ${props.popupClass} ` }>
                     <div className="modal-cell--content">
                         <div className="modal-cell--content__head">
                             Bulk Action

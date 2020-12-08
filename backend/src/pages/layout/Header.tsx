@@ -1,7 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const Header = () => {
+export interface Props {
+    endAccess : any
+} 
+
+const Header : React.FC<Props>  = ( props ) => {
+    
     return (
         <div className="top-header">
             <div className="container">
@@ -17,23 +22,23 @@ const Header = () => {
                             </ul>
                         </li>
                         <li className="main-nav--item">
-                            <Link className="main-nav--item__link"to="/">Brands</Link>
+                            <Link className="main-nav--item__link"to="/brands">Brands</Link>
                             <ul className="main-nav--sub">
-                                <li className="main-nav--sub--item"><Link className="main-nav--sub--item__link" to="/">View List</Link></li>
-                                <li className="main-nav--sub--item"><Link className="main-nav--sub--item__link" to="/">Add Brand</Link></li>
+                                <li className="main-nav--sub--item"><Link className="main-nav--sub--item__link" to="/brands">View List</Link></li>
+                                <li className="main-nav--sub--item"><Link className="main-nav--sub--item__link" to="/brands-form">Add Brand</Link></li>
                             </ul>
                         </li>
                         <li className="main-nav--item">
-                            <Link className="main-nav--item__link"to="/">Users</Link>
+                            <Link className="main-nav--item__link"to="/users">Users</Link>
                             <ul className="main-nav--sub">
-                                <li className="main-nav--sub--item"><Link className="main-nav--sub--item__link" to="/">View List</Link></li>
-                                <li className="main-nav--sub--item"><Link className="main-nav--sub--item__link" to="/">Add User</Link></li>
+                                <li className="main-nav--sub--item"><Link className="main-nav--sub--item__link" to="/users">View List</Link></li>
+                                <li className="main-nav--sub--item"><Link className="main-nav--sub--item__link" to="/users-form">Add User</Link></li>
                             </ul>
                         </li>
                     </ul>
 
                     <ul className="user-nav">
-                        <li className="user-nav--item"><Link className="user-nav--item__link" to="/"><i className="fa fa-cog"></i> Logout</Link></li>
+                        <li className="user-nav--item"><Link className="user-nav--item__link" to="/" onClick={ (e) => props.endAccess() }><i className="fa fa-cog"></i> Logout</Link></li>
                     </ul>
 
                 </div>

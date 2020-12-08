@@ -210,7 +210,6 @@ class ProductsRouter {
 
               try{
                 let query : string = ` UPDATE ${TBLprefix}products SET ${data_main_imploded}  WHERE id IN (${id}) `;
-                console.log(query);
                 DBconnect.query( query, function( err : Array<any>,  rows : Array<any>, fields : Array<any> ) {
                     if (err){
                       callback(null, 0);
@@ -395,13 +394,13 @@ class ProductsRouter {
 
             let query : string = ` SELECT * FROM  ${TBLprefix}products ${where_conditions} ${query_order} `;
     
-            if (params_request.hasOwnProperty('id')) {
-              query = ` SELECT * FROM  ${TBLprefix}products WHERE id IN ( ${params_request['id']} )`;
+            if (params_body.hasOwnProperty('id')) {
+              query = ` SELECT * FROM  ${TBLprefix}products WHERE id IN ( ${params_body['id']} )`;
             }
     
-            if (params_request.hasOwnProperty('brand_ids')) {
-              query = ` SELECT * FROM  ${TBLprefix}products WHERE brand_id IN (${params_request['brand_ids']}) `;
-            }
+            /* if (params_body.hasOwnProperty('brand_ids')) {
+              query = ` SELECT * FROM  ${TBLprefix}products WHERE brand_id IN (${params_body['brand_ids']}) `;
+            } */
     
             if ( sql_limit_arr.length>1 ){
               query += " LIMIT " + sql_limit_arr.join(',');
