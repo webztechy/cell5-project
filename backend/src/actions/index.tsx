@@ -11,3 +11,12 @@ export const isLoggedin = (nr : number = 0 ) : Object  =>{
     payload : nr
   }
 }
+
+
+export const showCounters = (nr : string = '' ) : Object  =>{
+  return{
+    type : 'SHOW_COUNTERS',
+    payload : nr
+  }
+}
+

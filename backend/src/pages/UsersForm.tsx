@@ -8,7 +8,7 @@ import config from './../helpers/Config';
 import { useDispatch } from 'react-redux';
 
 import { confirmAlert } from 'react-confirm-alert'; 
-import { showNotification  } from '../actions';
+import { showCounters, showNotification  } from '../actions';
 
 export interface formFields{
     username : string;
@@ -40,6 +40,7 @@ const UsersForm = () => {
     const { id } = useParams<any>();
     const [ formValues, setFormValues ] = useState<formFields>(formValuesDefault);
     const [ actionName, setActionName ] = useState<string>('add');
+    const [ buttonLabel, setButtonLabel ] = useState<string>('submit');
     const [ choosenID, setChoosenID ] = useState<string>('0');
     
     const messagePopup = ( title : string = 'Error', message : string = '' ) => {
@@ -106,6 +107,7 @@ const UsersForm = () => {
 
                     if ( actionTemp==='add' ){
                          setFormValues(formValuesDefault);
+                         dispatch( showCounters('users') );
                     }
 
                 }else{
@@ -156,6 +158,20 @@ const UsersForm = () => {
             messagePopup('Error', 'Could not get record!');
         }); 
     }
+
+    useEffect( () => {
+    
+        if ( typeof id!=='undefined' ){
+            setActionName('update');
+            setButtonLabel('update');
+        }else{
+            setActionName('add');
+            setChoosenID('0');
+            setButtonLabel('submit');
+            setFormValues(formValuesDefault);
+        }
+        
+    }, [id]);
 
     useEffect( () => {
         if ( typeof id!=='undefined' ){
@@ -232,7 +248,7 @@ const UsersForm = () => {
 
                   
                     <div className="mt-3">
-                        <button type="button" className="btn-cell--primary btn-cell--md full-width" onClick={ (e) => submitForm(e) }>submit</button>
+                        <button type="button" className="btn-cell--primary btn-cell--md full-width" onClick={ (e) => submitForm(e) }>{buttonLabel}</button>
                     </div>
                     
                 </form>

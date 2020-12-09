@@ -7,7 +7,7 @@ import { confirmAlert } from 'react-confirm-alert';
 import Utilities from './../helpers/Utilities';
 import config from './../helpers/Config';
 
-import { showNotification  } from '../actions';
+import { showCounters, showNotification  } from '../actions';
 import { useDispatch } from 'react-redux';
 
 
@@ -188,6 +188,7 @@ const Users = () => {
   
                 if ( parseInt(result_response.status)===1 ){
                     fecthList();
+                    dispatch( showCounters('users') );
                     dispatch( showNotification('Delete successfully!') );
                 }else{
                     messagePopup('Error', 'Could not delete record!');

@@ -6,6 +6,7 @@ const Home = () => {
 
     const [ pTotal, setPTotal ] = useState<number>(0);
     const [ bTotal, setBTotal ] = useState<number>(0);
+    const [ oTotal, setOTotal ] = useState<number>(0);
     const [ uTotal, setUTotal ] = useState<number>(0);
     const [ loginDetail, setLoginDetail ] = useState<any>({});
 
@@ -19,6 +20,8 @@ const Home = () => {
 
                 if ( type=='products' ){
                     setPTotal(result_response.total);
+                }else if ( type=='orders'  ){
+                    setOTotal(result_response.total);
                 }else if ( type=='brands'  ){
                     setBTotal(result_response.total);
                 }else if ( type=='users'  ){
@@ -29,10 +32,8 @@ const Home = () => {
         .catch( (err : any ) => {
             
         }); 
-
     }
 
-    
     useEffect( () =>{
 
         const login_session : any = sessionStorage.getItem('login_session');
@@ -43,6 +44,7 @@ const Home = () => {
         }
         
         getTotal('products');
+        getTotal('orders');
         getTotal('brands');
         getTotal('users');
 
@@ -58,6 +60,13 @@ const Home = () => {
                     <div>
                         <div className="summary-list--title">products</div>
                         <div className="summary-list--subtitle">{pTotal} records</div>
+                    </div>
+                </li>
+                <li className="summary-list--box">
+                     <div className="summary-list--icon"><i className="fa fa-cart-arrow-down" aria-hidden="true"></i></div>
+                    <div>
+                        <div className="summary-list--title">Orders</div>
+                        <div className="summary-list--subtitle">{oTotal} records</div>
                     </div>
                 </li>
                 <li className="summary-list--box">

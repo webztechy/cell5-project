@@ -9,7 +9,7 @@ import Utilities from './../helpers/Utilities';
 import config from './../helpers/Config';
 
 import ProductsBulk from './ProductsBulk';
-import { showNotification  } from '../actions';
+import { showCounters, showNotification  } from '../actions';
 import { useDispatch } from 'react-redux';
 
 
@@ -218,6 +218,7 @@ const Products = () => {
                 if ( parseInt(result_response.status)===1 ){
                     //messagePopup('Success', 'Delete successfully!');
                     fecthList();
+                    dispatch( showCounters('products') );
                     dispatch( showNotification('Delete successfully!') );
                 }else{
                     messagePopup('Error', 'Could not delete record!');
@@ -519,7 +520,7 @@ const Products = () => {
 
                                 <ul className="curency-list">
                                 { Object.entries(currencyRates).map( ( [key, rate ] : any ) => (
-                                    <li key={{key}} className="currency-list-row">
+                                    <li key={key} className="currency-list-row">
                                         <div>{key}</div>
                                         <div>{rate}</div>
                                         <div><input type="radio" value={rate}  name="rates" onClick={ (e) => showOtherRate(e, key ) }/></div>

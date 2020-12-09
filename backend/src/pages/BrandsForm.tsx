@@ -8,7 +8,7 @@ import config from './../helpers/Config';
 import { useDispatch } from 'react-redux';
 
 import { confirmAlert } from 'react-confirm-alert'; 
-import { showNotification  } from '../actions';
+import { showCounters, showNotification  } from '../actions';
 
 export interface formFields{
     name : string;
@@ -28,6 +28,7 @@ const BrandsForm = () => {
     const { id } = useParams<any>();
     const [ formValues, setFormValues ] = useState<formFields>(formValuesDefault);
     const [ actionName, setActionName ] = useState<string>('add');
+    const [ buttonLabel, setButtonLabel ] = useState<string>('submit');
     const [ choosenID, setChoosenID ] = useState<string>('0');
     
     const messagePopup = ( title : string = 'Error', message : string = '' ) => {
@@ -82,6 +83,7 @@ const BrandsForm = () => {
 
                     if ( actionTemp==='add' ){
                          setFormValues(formValuesDefault);
+                         dispatch( showCounters('brands') );
                     }
 
                 }else{
@@ -129,6 +131,20 @@ const BrandsForm = () => {
     }
 
     useEffect( () => {
+    
+        if ( typeof id!=='undefined' ){
+            setActionName('update');
+            setButtonLabel('update');
+        }else{
+            setActionName('add');
+            setChoosenID('0');
+            setButtonLabel('submit');
+            setFormValues(formValuesDefault);
+        }
+        
+    }, [id]);
+
+    useEffect( () => {
         if ( typeof id!=='undefined' ){
             const decodedID : any = id;
             const encodedID : string = atob(decodedID);
@@ -172,7 +188,7 @@ const BrandsForm = () => {
                     </div>
                   
                     <div className="mt-3">
-                        <button type="button" className="btn-cell--primary btn-cell--md full-width" onClick={ (e) => submitForm(e) }>submit</button>
+                        <button type="button" className="btn-cell--primary btn-cell--md full-width" onClick={ (e) => submitForm(e) }>{buttonLabel}</button>
                     </div>
                     
                 </form>

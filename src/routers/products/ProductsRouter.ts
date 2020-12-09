@@ -393,7 +393,6 @@ class ProductsRouter {
           product_list: function(callback : any) {
 
             let query : string = ` SELECT * FROM  ${TBLprefix}products ${where_conditions} ${query_order} `;
-    
             if (params_body.hasOwnProperty('id')) {
               query = ` SELECT * FROM  ${TBLprefix}products WHERE id IN ( ${params_body['id']} )`;
             }
@@ -469,26 +468,38 @@ class ProductsRouter {
                       res.status(500).send(error_response);
                     }else{
                       
-                      let row_meta : any = [];
+                      let row_meta : any = [], all_products_rows_temp : any = {};
                       row_meta = UtilitiesHelper._convertArray(rows);
+
                       for (const [key, value] of Object.entries(row_meta)) {
                           let row : any = [];
                           row = value;
                           const product_id : number = row.group_id;
-            
+
                           if (all_products_rows.hasOwnProperty(product_id)) {
-                            let add_value = all_products_rows[product_id];
+                            let add_value : any = all_products_rows[product_id];
                             row_meta[key] = {...row_meta[key], ...add_value };
+                            all_products_rows_temp[product_id] =  row_meta[key];
                           }
                       } 
-                      
+
+                      let row_meta_sorted : any = [];
+
+                      for (const [key, id] of Object.entries(all_products_id_arr)) {
+                        if (all_products_rows_temp.hasOwnProperty(id)) {
+                          const product_id : any = id;
+                          let add_value : any = all_products_rows_temp[product_id];
+                          row_meta_sorted.push(add_value);
+                        }
+                      } 
+
                       res.send(JSON.stringify({
                                         status : 1,
                                         total_records : total_list.total, 
                                         total_pages : Math.ceil(total_list.total/limit),
                                         per_page : limit,
                                         current_page : current_page,
-                                        list: row_meta
+                                        list: row_meta_sorted
                                     })); 
                     }
                 });

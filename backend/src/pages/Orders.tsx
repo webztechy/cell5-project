@@ -22,19 +22,19 @@ export interface pagesInfoFields {
 export interface filterValuesFields {
     page : number;
     limit : number;
-    status : number;
-    name : string;
+    order_number : string;
 }
 
 
 export interface tableHeadSort {
-    name : number;
-    status : number;
+    order_number : number;
+    price : number;
     date_created : number;
 }
 
-const Brands = () => {
+const Orders = () => {
 
+    
     const pagesInfoTemp  : pagesInfoFields = {
         current_page : 0,
         per_page: 0,
@@ -46,15 +46,15 @@ const Brands = () => {
     const filterValuesOption : filterValuesFields = {
         page : 1,
         limit : config.page_limit,
-        status :-1,
-        name : ''
+        order_number : ''
     }
 
     const tableHeadLabelsSort : tableHeadSort = {
-        name : 1,
-        status : 0,
+        order_number : 1,
+        price : 0,
         date_created :0,
     }
+
 
     const dispatch = useDispatch();
     const [ list, setList ] = useState<any>([]);
@@ -69,10 +69,8 @@ const Brands = () => {
         fieldName = fieldName.toLowerCase();
         let value : any = e.target.value;
 
-        if ( fieldName==='name'){
-            setPagesFilter({...pagesFilter, ...{ name : value } });
-        }else  if ( fieldName==='status'){
-            setPagesFilter({...pagesFilter, ...{ status : value } });
+        if ( fieldName==='order_number'){
+            setPagesFilter({...pagesFilter, ...{ order_number : value } });
         }else  if ( fieldName==='page'){
             setPagesFilter({...pagesFilter, ...{ page : value } });
         }else  if ( fieldName==='limit'){
@@ -120,10 +118,10 @@ const Brands = () => {
                 else if (currentSort===1){ currentSort = 2;  }
                 else if (currentSort===2){  currentSort = 0; }
 
-                if ( fieldName=='name'){
-                    tableHeadSortTemp = { ...tableHeadSortTemp, ...{ name : currentSort } };
-                }else if ( fieldName=='status'){
-                    tableHeadSortTemp = { ...tableHeadSortTemp, ...{ status : currentSort } };
+                if ( fieldName=='order_number'){
+                    tableHeadSortTemp = { ...tableHeadSortTemp, ...{ order_number : currentSort } };
+                }else if ( fieldName=='price'){
+                    tableHeadSortTemp = { ...tableHeadSortTemp, ...{ price : currentSort } };
                 }else if ( fieldName=='date_created'){
                     tableHeadSortTemp = { ...tableHeadSortTemp, ...{ date_created : currentSort } };
                 }
@@ -178,13 +176,13 @@ const Brands = () => {
         if ( !Utilities.isEmpty(ids) ){
             
             axios
-            .post(config.api_url+'/api/brands/delete', { ids : ids } )
+            .post(config.api_url+'/api/orders/delete', { ids : ids } )
             .then( (response : any )=> {
                 let result_response : any = response.data;
   
                 if ( parseInt(result_response.status)===1 ){
                     fecthList();
-                    dispatch( showCounters('brands') );
+                    dispatch( showCounters('orders') );
                     dispatch( showNotification('Delete successfully!') );
                 }else{
                     messagePopup('Error', 'Could not delete record!');
@@ -202,7 +200,7 @@ const Brands = () => {
     const fecthList = async () => {
 
         axios
-        .post(config.api_url+'/api/brands/list', pagesFilter )
+        .post(config.api_url+'/api/orders/list', pagesFilter )
         .then( ( response : any ) => {
             let result_response : any = [], record_list : any = [];
 
@@ -246,50 +244,41 @@ const Brands = () => {
         <div className="fade-in">
 
             <ul className="ul-table--filter">
-                <li>Brand List</li>
+                <li>Order List</li>
                 <li className="ul-table--filter--option">
                     filter by
-                    <select className="cell-input" value={pagesFilter.status} onChange={ (e) => pushValue( e, 'status') }>
-                        <option value="-1">status</option>
-                        <option value="1">active</option>
-                        <option value="0">inactive</option>
-                    </select>
-                    <input type="text" className="cell-input" placeholder="type name here.." value={pagesFilter.name} onChange={ (e) => pushValue( e, 'name') }></input>
-
+                    <input type="text" className="cell-input" placeholder="type name here.." value={pagesFilter.order_number} onChange={ (e) => pushValue( e, 'order_number') }></input>
                     <button type="button" className="btn-cell--primary" onClick={ (e) => resetFilter() }>reset</button>
                 </li>
             </ul>
 
-            <ul className="ul-table ul-table--head ul-table--brands">
+            <ul className="ul-table ul-table--head ul-table--orders">
                 <li className="ul-table--tr">
                     <div></div>
-                    <div className={ ( (tableHeadSort.name===1) ? 'sort-asc' : (tableHeadSort.name===2) ? 'sort-desc' : '' )} onClick={ () => updateSort('name') } >name</div>
-                    <div className="sort-none">description</div>
-                    <div className={ ( (tableHeadSort.status===1) ? 'sort-asc' : (tableHeadSort.status===2) ? 'sort-desc' : '' )} onClick={ () => updateSort('status') } >status</div>
-                    <div className={ ( (tableHeadSort.date_created===1) ? 'sort-asc' : (tableHeadSort.date_created===2) ? 'sort-desc' : '' )} onClick={ () => updateSort('date_created') } >date created</div>
-                    <div  className="sort-none"></div>
+                    <div className={ ( (tableHeadSort.order_number===1) ? 'sort-asc' : (tableHeadSort.order_number===2) ? 'sort-desc' : '' )} onClick={ () => updateSort('order_number') }>Order Number</div>
+                    <div className={ ( (tableHeadSort.price===1) ? 'sort-asc' : (tableHeadSort.price===2) ? 'sort-desc' : '' )} onClick={ () => updateSort('price') }>Price</div>
+                    <div className={ ( (tableHeadSort.date_created===1) ? 'sort-asc' : (tableHeadSort.date_created===2) ? 'sort-desc' : '' )} onClick={ () => updateSort('date_created') }>Date Created</div>
+                    <div className="sort-none"></div>
                 </li>
             </ul>
 
 
-            <ul className="ul-table ul-table--body ul-table--brands">
+            <ul className="ul-table ul-table--body ul-table--orders">
             { 
                 ( pagesInfo.status===1 && pagesInfo.total_pages>0 ) ?
                     (
                         Object.entries(list).map( ( [key, row ] : any ) => (
                         <li  key={row.group_id} className="ul-table--tr">
                             <div><input type="checkbox" className="cell-checkbox" value={row.group_id} onChange={ (e) => _pushID(e) }></input></div>
-                            <div>{row.name}</div>
-                            <div>{row.description}</div>
-                            <div>{Utilities.statusLabels(row.status)}</div>
+                            <div>{row.order_number}</div>
+                            <div>{Utilities.number_format(row.price, 2)}</div>
                             <div>{row.date_formatted}</div>
-                            <div><Link to={`/brands-form/${btoa(row.group_id)}`} className="btn-record--edit"></Link></div>
+                            <div><Link to={`/orders-form/${btoa(row.group_id)}`} className="btn-record--edit"></Link></div>
                         </li>
                         ))
                 ) : 
                 ( <li className="no-record">no record available</li> )
             }
-        
             </ul>
 
             <ul className="ul-table ul-table--footer">
@@ -337,4 +326,4 @@ const Brands = () => {
     )
 }
 
-export default Brands;
+export default Orders;

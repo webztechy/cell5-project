@@ -11,6 +11,12 @@ class UtilitiesHelper {
         return Array.from({ length }, (_, i) => start + i);
     }
 
+    fieldSorter = (fields : any ) => ( a : any, b : any) => fields.map( ( o : any ) => {
+        let dir : number = 1;
+        if (o[0] === '-') { dir = -1; o=o.substring(1); }
+        return a[o] > b[o] ? dir : a[o] < b[o] ? -(dir) : 0;
+    }).reduce((p : any , n : any ) => p ? p : n, 0);
+
     _convertArray = ( row_array : Array<any> = [] ) : Array<any> => {
     
         let row_meta : Array<any> = [];

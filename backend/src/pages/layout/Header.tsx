@@ -2,7 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 export interface Props {
-    endAccess : any
+    endAccess : any;
+    pTotal : number;
+    oTotal : number;
+    bTotal : number;
+    uTotal : number
 } 
 
 const Header : React.FC<Props>  = ( props ) => {
@@ -15,21 +19,28 @@ const Header : React.FC<Props>  = ( props ) => {
                     <ul className="main-nav">
                         <li className="main-nav--item"><Link className="main-nav--item__link" to="/home">Home</Link></li>
                         <li className="main-nav--item">
-                            <Link className="main-nav--item__link"to="/products">Products</Link>
+                            <Link className="main-nav--item__link"to="/products">Products <span className="nav-counter">{props.pTotal}</span></Link>
                             <ul className="main-nav--sub">
                                 <li className="main-nav--sub--item"><Link className="main-nav--sub--item__link" to="/products">View List</Link></li>
                                 <li className="main-nav--sub--item"><Link className="main-nav--sub--item__link" to="/products-form">Add Product</Link></li>
                             </ul>
                         </li>
                         <li className="main-nav--item">
-                            <Link className="main-nav--item__link"to="/brands">Brands</Link>
+                            <Link className="main-nav--item__link"to="/orders">Order <span className="nav-counter">{props.oTotal}</span></Link>
+                            <ul className="main-nav--sub">
+                                <li className="main-nav--sub--item"><Link className="main-nav--sub--item__link" to="/orders">View List</Link></li>
+                                <li className="main-nav--sub--item"><Link className="main-nav--sub--item__link" to="/orders-form">Add Order</Link></li>
+                            </ul>
+                        </li>
+                        <li className="main-nav--item">
+                            <Link className="main-nav--item__link"to="/brands">Brands <span className="nav-counter">{props.bTotal}</span></Link>
                             <ul className="main-nav--sub">
                                 <li className="main-nav--sub--item"><Link className="main-nav--sub--item__link" to="/brands">View List</Link></li>
                                 <li className="main-nav--sub--item"><Link className="main-nav--sub--item__link" to="/brands-form">Add Brand</Link></li>
                             </ul>
                         </li>
                         <li className="main-nav--item">
-                            <Link className="main-nav--item__link"to="/users">Users</Link>
+                            <Link className="main-nav--item__link"to="/users">Users <span className="nav-counter">{props.uTotal}</span></Link>
                             <ul className="main-nav--sub">
                                 <li className="main-nav--sub--item"><Link className="main-nav--sub--item__link" to="/users">View List</Link></li>
                                 <li className="main-nav--sub--item"><Link className="main-nav--sub--item__link" to="/users-form">Add User</Link></li>

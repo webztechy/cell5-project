@@ -1,9 +1,10 @@
-import { pageUtilitiesReducer, isloggedinReducer }  from './pages';
+import { pageUtilitiesReducer, isloggedinReducer, showCountersReducers }  from './pages';
 import { combineReducers } from 'redux';
 
 const allReducers = combineReducers({
     showNotification : pageUtilitiesReducer,
-    isLoggedin : isloggedinReducer
+    isLoggedin : isloggedinReducer,
+    showCounters : showCountersReducers
 });
 
 export default allReducers;

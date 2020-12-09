@@ -386,6 +386,10 @@ class UsersRouter {
             where_conditions = ` WHERE ${where_conditions_arr.join(' AND ')} `;
           }
 
+          if ( params_body.hasOwnProperty('sorting')) {
+            let sorting : string  = params_body['sorting'];
+            if ( sorting!=='' ){ query_order = ` ORDER BY ${sorting} `; }
+          }
 
           this._async.parallel({
 
@@ -465,8 +469,9 @@ class UsersRouter {
                       res.status(500).send(error_response);
                     }else{
                       
-                      let row_meta : any = [];
+                      let row_meta : any = [], all_users_rows_temp : any = {};
                       row_meta = UtilitiesHelper._convertArray(rows);
+
                       for (const [key, value] of Object.entries(row_meta)) {
                           let row : any = [];
                           row = value;
@@ -475,9 +480,19 @@ class UsersRouter {
                           if (all_users_rows.hasOwnProperty(product_id)) {
                             let add_value = all_users_rows[product_id];
                             row_meta[key] = {...row_meta[key], ...add_value };
+                            all_users_rows_temp[product_id] =  row_meta[key];
                           }
                       } 
                       
+                      let row_meta_sorted : any = [];
+
+                      for (const [key, id] of Object.entries(all_users_id_arr)) {
+                        if (all_users_rows_temp.hasOwnProperty(id)) {
+                          const product_id : any = id;
+                          let add_value : any = all_users_rows_temp[product_id];
+                          row_meta_sorted.push(add_value);
+                        }
+                      } 
 
                       res.send(JSON.stringify({
                                         status : 1,
@@ -485,7 +500,7 @@ class UsersRouter {
                                         total_pages : Math.ceil(total_list.total/limit),
                                         per_page : limit,
                                         current_page : current_page,
-                                        list: row_meta
+                                        list: row_meta_sorted
                                     })); 
                     }
                 });

@@ -1,25 +1,25 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import async from 'async';
 
-import BrandsController from '../../controllers/BrandsController';
+import OrdersController from '../../controllers/OrdersController';
 import ConnectionModel from '../../models/ConnectionModel';
 
 import UtilitiesHelper from '../../helpers/UtilitiesHelper';
 import dotenv from 'dotenv';
 
-
-class BrandsRouter {
+class OrdersRouter {
 
   private _router = Router();
   private _async = async;
-  private _controller = BrandsController;
+  private _controller = OrdersController;
   private _connection = ConnectionModel;
-
+  
   get router() {
     return this._router;
   }
 
   constructor() {
+    dotenv.config();
     this._configure();
   }
 
@@ -33,26 +33,25 @@ class BrandsRouter {
     const error_response : any = JSON.stringify({status : 0 , message : 'Could not process request!'});
 
     interface keyMainFields{
-      name : string;
-      status: number;
+      order_number : string;
+      price: string;
       date_created : string;
     }
   
     interface keyMetaFields{
-      description : string;
+      items : string;
     }
 
-
     // roots --------------------------------------------------------------------------------------
+
     this._router.get('/', (req: Request, res: Response, next: NextFunction) => {
       res.status(200).json(this._controller.defaultMethod());
     });
-
-
-    // total --------------------------------------------------------------------------------------
-    this._router.post('/total', (req: Request, res: Response, next: NextFunction) => {
+    
+     // total --------------------------------------------------------------------------------------
+     this._router.post('/total', (req: Request, res: Response, next: NextFunction) => {
       try{
-        const query : string = ` SELECT COUNT(*) as total FROM ${TBLprefix}brands `;
+        const query : string = ` SELECT COUNT(*) as total FROM ${TBLprefix}orders `;
         DBconnect.query( query, function( err : Array<any>,  rows : Array<any>, fields : Array<any> ) {
             if (err){
                 res.status(400).send( error_response );
@@ -75,8 +74,8 @@ class BrandsRouter {
           
           let data_main : keyMainFields;
           data_main = {
-                        name : meta_data.name,
-                        status : meta_data.status,
+                        order_number : meta_data.order_number,
+                        price : meta_data.price,
                         date_created : ''
                     }
           if (meta_data.hasOwnProperty('date_created')) {
@@ -96,7 +95,7 @@ class BrandsRouter {
               }
 
               try{
-                let query : string = ` INSERT INTO ${TBLprefix}brands (${data_fields.join(',')}) VALUES (${data_values.join(',')}); `;
+                let query : string = ` INSERT INTO ${TBLprefix}orders (${data_fields.join(',')}) VALUES (${data_values.join(',')}); `;
 
                 DBconnect.query( query, function( err : Array<any>,  rows : any , fields : Array<any> ) {
                     if (err){
@@ -116,12 +115,12 @@ class BrandsRouter {
              if (parseInt(new_id)>0 ){
 
                 let data_meta : keyMetaFields = {
-                  description : meta_data.description
+                  items : meta_data.items
                 };
 
                 let query : string = '';
                 for (const [key, value] of Object.entries(data_meta) ) {
-                  query += ` INSERT INTO ${TBLprefix}brands_meta (group_id, meta_key, meta_value) VALUES ('${new_id}', '${key}', '${value}'); `;
+                  query += ` INSERT INTO ${TBLprefix}orders_meta (group_id, meta_key, meta_value) VALUES ('${new_id}', '${key}', '${value}'); `;
                 } 
 
                 try{
@@ -147,7 +146,6 @@ class BrandsRouter {
         res.status(400).send( error_response );
       } 
 
-
     });
 
 
@@ -164,11 +162,11 @@ class BrandsRouter {
           main: function(callback : any ) {
 
               let data_main : keyMainFields = {
-                name : meta_data.name,
-                status : meta_data.status,
+                order_number : meta_data.order_number,
+                price : meta_data.price,
                 date_created : ''
               }
-
+              
               let data_meta : any = [];
               for (const [key, value] of Object.entries(data_main)) {
                 if (key==='date_created'){ continue; }
@@ -178,7 +176,7 @@ class BrandsRouter {
               const data_main_imploded = data_meta.join(', ');
 
               try{
-                let query : string = ` UPDATE ${TBLprefix}brands SET ${data_main_imploded}  WHERE id IN (${id}) `;
+                let query : string = ` UPDATE ${TBLprefix}orders SET ${data_main_imploded}  WHERE id IN (${id}) `;
                 DBconnect.query( query, function( err : Array<any>,  rows : Array<any>, fields : Array<any> ) {
                     if (err){
                       callback(null, 0);
@@ -196,12 +194,12 @@ class BrandsRouter {
             if (parseInt(results.main)>0 ){
 
               let data_meta : keyMetaFields = {
-                description : meta_data.description
+                items : meta_data.items
               };
 
               let query = '';
               for (const [key, value] of Object.entries(data_meta) ) {
-                query += ` UPDATE ${TBLprefix}brands_meta SET meta_value = '${value}' WHERE meta_key LIKE '${key}' AND  group_id IN (${id}); `;
+                query += ` UPDATE ${TBLprefix}orders_meta SET meta_value = '${value}' WHERE meta_key LIKE '${key}' AND  group_id IN (${id}); `;
               } 
 
               try{
@@ -243,7 +241,7 @@ class BrandsRouter {
           main: function(callback : any) {
             
             try{
-              let query : string =  `DELETE  FROM ${TBLprefix}brands WHERE id IN (${ids})`;
+              let query : string =  `DELETE  FROM ${TBLprefix}orders WHERE id IN (${ids})`;
               DBconnect.query( query, function( err : Array<any>,  rows : Array<any>, fields : Array<any> ) {
                     if (err){
                       callback(null, 0);
@@ -261,7 +259,7 @@ class BrandsRouter {
 
             try{
               
-              let query : string = ` DELETE  FROM ${TBLprefix}brands_meta WHERE group_id IN (${ids}) `;
+              let query : string = ` DELETE  FROM ${TBLprefix}orders_meta WHERE group_id IN (${ids}) `;
               DBconnect.query( query, function( err : Array<any>,  rows : Array<any>, fields : Array<any> ) {
                 if (err){
                   res.status(400).send(error_response);
@@ -286,7 +284,6 @@ class BrandsRouter {
       }
 
     });
-
 
 
     // list --------------------------------------------------------------------------------------
@@ -323,23 +320,16 @@ class BrandsRouter {
 
           let where_conditions : string = '';
           let where_conditions_arr : any = [];
-          let query_order : string = ` ORDER BY name ASC `;
+          let query_order : string = ` ORDER BY order_number ASC `;
 
-
-          if ( params_body.hasOwnProperty('status')) {
-            let status : number = parseInt(params_body['status']);
-            if ( status>=0 ){ where_conditions_arr.push(` status IN (${status}) `); }
-          }
-  
-          if ( params_body.hasOwnProperty('name')) {
-            let name : string  = params_body['name'];
-            if ( name!=='' ){ where_conditions_arr.push(` name LIKE "${name}%" `); }
+          if ( params_body.hasOwnProperty('order_number')) {
+            let order_number : string  = params_body['order_number'];
+            if ( order_number!=='' ){ where_conditions_arr.push(` order_number LIKE "${order_number}%" `); }
           }
   
           if ( where_conditions_arr.length>0 ){
             where_conditions = ` WHERE ${where_conditions_arr.join(' AND ')} `;
           }
-
 
           if ( params_body.hasOwnProperty('sorting')) {
             let sorting : string  = params_body['sorting'];
@@ -351,10 +341,9 @@ class BrandsRouter {
 
             list: function(callback : any) {
 
-                  let query : string = ` SELECT * FROM  ${TBLprefix}brands ${where_conditions} ${query_order} `;
-
+                  let query : string = ` SELECT * FROM  ${TBLprefix}orders ${where_conditions} ${query_order} `;
                   if (params_body.hasOwnProperty('id')) {
-                    query = ` SELECT * FROM  ${TBLprefix}brands WHERE id IN ( ${params_body['id']} )`;
+                    query = ` SELECT * FROM  ${TBLprefix}orders WHERE id IN ( ${params_body['id']} )`;
                   }
           
                   if ( sql_limit_arr.length>1 ){
@@ -379,7 +368,7 @@ class BrandsRouter {
 
             total: function(callback : any) {
                   try{
-                    const query : string = ` SELECT COUNT(*) as total FROM ${TBLprefix}brands ${where_conditions} ${query_order} `;
+                    const query : string = ` SELECT COUNT(*) as total FROM ${TBLprefix}orders ${where_conditions} ${query_order} `;
                     DBconnect.query( query, function( err : Array<any>,  rows : Array<any>, fields : Array<any> ) {
                         if (err){
                           callback(null, { status : 0 } );
@@ -416,7 +405,7 @@ class BrandsRouter {
           
                 let all_products_id_imploded : string = all_brands_id_arr.join();
         
-                let query = ` SELECT * FROM  ${TBLprefix}brands_meta WHERE group_id IN (${all_products_id_imploded})  ORDER BY FIELD( group_id, ${all_products_id_imploded} ) `;
+                let query = ` SELECT * FROM  ${TBLprefix}orders_meta WHERE group_id IN (${all_products_id_imploded})  ORDER BY FIELD( group_id, ${all_products_id_imploded} ) `;
                 DBconnect.query( query, function( err : Array<any>,  rows : Array<any>, fields : Array<any> ) {
                     if (err){
                       res.status(500).send(error_response);
@@ -483,9 +472,9 @@ class BrandsRouter {
       } 
     
     });
-    
+
 
   }
 }
 
-export = new BrandsRouter().router;
+export = new OrdersRouter().router;

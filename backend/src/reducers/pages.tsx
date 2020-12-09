@@ -24,3 +24,15 @@ export const isloggedinReducer = ( state : number = 0, action : any ) =>{
     }
 }
 
+export const showCountersReducers = ( state : string = '', action : any ) =>{
+    switch (action.type) {
+        case 'SHOW_COUNTERS':
+                state = action.payload;
+                return state;
+            break;
+    
+        default:
+            return state;
+            break;
+    }
+}
