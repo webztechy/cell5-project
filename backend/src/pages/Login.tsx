@@ -51,7 +51,7 @@ const Login = () => {
         if ( !Utilities.isEmpty(formValues.username) && !Utilities.isEmpty(formValues.password) ){
                 
             axios
-            .post(config.api_url+'/api/login/auth', formValues )
+            .post(`${process.env.REACT_APP_api_url}/api/login/auth`, formValues )
             .then( response => {
                 let result_response : any = [], record_list : any = [];
     

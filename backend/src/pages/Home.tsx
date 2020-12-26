@@ -13,7 +13,7 @@ const Home = () => {
     const getTotal = async ( type : string ) => {
     
         axios
-        .post(`${config.api_url}/api/${type}/total` )
+        .post(`${process.env.REACT_APP_api_url}/api/${type}/total` )
         .then( (response : any )=> {
             let result_response : any = response.data;
             if ( parseInt(result_response.status)===1 ){

@@ -73,7 +73,7 @@ const BrandsForm = () => {
             }
 
             axios
-            .post(`${config.api_url}/api/brands/${actionName}`, formValuesRequest )
+            .post(`${process.env.REACT_APP_api_url}/api/brands/${actionName}`, formValuesRequest )
             .then( (response : any )=> {
                 let result_response : any = response.data;
 
@@ -102,7 +102,7 @@ const BrandsForm = () => {
     const getDetail = async ( id : string ) => {
         
         axios
-        .post(config.api_url+'/api/brands/list', { id : id })
+        .post(`${process.env.REACT_APP_api_url}/api/brands/list`, { id : id })
         .then( response => {
             let result_response : any = [], record_list : any = [];
 

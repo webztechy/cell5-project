@@ -211,7 +211,7 @@ const Products = () => {
         if ( !Utilities.isEmpty(ids) ){
             
             axios
-            .post(config.api_url+'/api/products/delete', { ids : ids } )
+            .post(`${process.env.REACT_APP_api_url}/api/products/delete`, { ids : ids } )
             .then( (response : any )=> {
                 let result_response : any = response.data;
   
@@ -245,7 +245,7 @@ const Products = () => {
     const fecthList = async () => {
         
         axios
-        .post(config.api_url+'/api/products/list', pagesFilter )
+        .post(`${process.env.REACT_APP_api_url}/api/products/list`, pagesFilter )
         .then( ( response : any ) => {
             let result_response : any = [], record_list : any = [];
 
@@ -291,7 +291,7 @@ const Products = () => {
 
     const fecthListBrands = async () => {
         axios
-        .post(config.api_url+'/api/brands/list')
+        .post(`${process.env.REACT_APP_api_url}/api/brands/list`)
         .then( response => {
             let result_response : any = [], record_list : any = [];
 
@@ -322,7 +322,7 @@ const Products = () => {
             let valuesRequest : Array<any> = {...values, ...{ id : choosenID.join(',') } };
 
             axios
-            .post(config.api_url+'/api/products/update?bulk=1', valuesRequest )
+            .post(`${process.env.REACT_APP_api_url}/api/products/update?bulk=1`, valuesRequest )
             .then( (response : any )=> {
                 let result_response : any = response.data;
 

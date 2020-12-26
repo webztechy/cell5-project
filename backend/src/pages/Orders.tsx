@@ -176,7 +176,7 @@ const Orders = () => {
         if ( !Utilities.isEmpty(ids) ){
             
             axios
-            .post(config.api_url+'/api/orders/delete', { ids : ids } )
+            .post(`${process.env.REACT_APP_api_url}/api/orders/delete`, { ids : ids } )
             .then( (response : any )=> {
                 let result_response : any = response.data;
   

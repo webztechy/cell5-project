@@ -154,7 +154,7 @@ const OrdersForm = () => {
 
         if ( !Utilities.isEmpty(id) ){
             axios
-            .post(config.api_url+'/api/products/list', { id : id } )
+            .post(`${process.env.REACT_APP_api_url}/api/products/list`, { id : id } )
             .then( ( response : any ) => {
                 let result_response : any = [], record_list : any = [], record_temp : any = {};
 
@@ -187,7 +187,7 @@ const OrdersForm = () => {
         let keywords : string = e.target.value;
 
         axios
-        .post(config.api_url+'/api/products/list', { name : keywords } )
+        .post(`${process.env.REACT_APP_api_url}/api/products/list`, { name : keywords } )
         .then( ( response : any ) => {
             let result_response : any = [], record_list : any = [];
 
@@ -243,7 +243,7 @@ const OrdersForm = () => {
     const getDetail = async ( id : string ) => {
         
         axios
-        .post(config.api_url+'/api/orders/list', { id : id })
+        .post(`${process.env.REACT_APP_api_url}/api/orders/list`, { id : id })
         .then( response => {
             let result_response : any = [], record_list : any = [];
 
@@ -312,7 +312,7 @@ const OrdersForm = () => {
             }
 
             axios
-            .post(`${config.api_url}/api/orders/${actionName}`, formValuesRequest )
+            .post(`${process.env.REACT_APP_api_url}/api/orders/${actionName}`, formValuesRequest )
             .then( (response : any )=> {
                 let result_response : any = response.data;
 

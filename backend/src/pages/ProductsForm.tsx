@@ -85,7 +85,7 @@ const ProductsForm = () => {
             }
 
             axios
-            .post(`${config.api_url}/api/products/${actionName}`, formValuesRequest )
+            .post(`${process.env.REACT_APP_api_url}/api/products/${actionName}`, formValuesRequest )
             .then( (response : any )=> {
                 let result_response : any = response.data;
 
@@ -113,7 +113,7 @@ const ProductsForm = () => {
 
     const fecthListBrands = async () => {
         axios
-        .post(config.api_url+'/api/brands/list')
+        .post(`${process.env.REACT_APP_api_url}/api/brands/list`)
         .then( response => {
             let result_response : any = [], record_list : any = [];
 
@@ -139,7 +139,7 @@ const ProductsForm = () => {
     const getDetail = async ( id : string ) => {
 
         axios
-        .post(config.api_url+'/api/products/list', { id : id })
+        .post(`${process.env.REACT_APP_api_url}/api/products/list`, { id : id })
         .then( response => {
             let result_response : any = [], record_list : any = [];
 
